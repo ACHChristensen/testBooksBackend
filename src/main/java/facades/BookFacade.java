@@ -2,8 +2,11 @@ package facades;
 
 import dtos.BookDTO;
 import entities.Book;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
 
 public class BookFacade {
 
@@ -24,12 +27,37 @@ public class BookFacade {
         try {
             em.getTransaction().begin();
             em.persist(book);
-            em.find(Book.class, bookDTO.getIsbn());
+           book = em.find(Book.class, bookDTO.getIsbn());
+            
             em.getTransaction().commit();
         } finally {
             em.close();
         }
         return new BookDTO(book);
+    }
+
+    
+    
+    public List<BookDTO> getBookList() {
+        EntityManager em = emf.createEntityManager();
+        List<BookDTO> dtos = new ArrayList();
+        try{
+            em.getTransaction().begin();
+            TypedQuery<Book> TQ = em.createQuery("SELECT b FROM Book b", Book.class);
+            List<Book> books =  TQ.getResultList();
+            for (Book book : books) {
+                BookDTO dto = new BookDTO(book);
+                dtos.add(dto);
+                
+            }
+            
+            
+        } finally{
+            em.close();
+        }
+       
+        
+        return dtos;
     }
 
 }
